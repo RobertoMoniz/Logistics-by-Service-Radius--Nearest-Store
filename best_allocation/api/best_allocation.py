@@ -14,7 +14,7 @@ app = FastAPI()
 @app.get('/optimize')
 def optimize(hub,date,available_employees,work_hours=8,service_time=0.5,conversion_rate=0.2):
     
-    #Transforming from string
+    #Transforming f rom string
     date=pd.to_datetime(date)
     available_employees=float(available_employees)
     work_hours=float(work_hours)
@@ -44,3 +44,4 @@ def optimize(hub,date,available_employees,work_hours=8,service_time=0.5,conversi
     
     return response
 
+print(optimize('São Cristóvão', '08/10/2022', 8))

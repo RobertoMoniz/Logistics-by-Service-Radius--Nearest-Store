@@ -2,3 +2,8 @@ uvicorn
 fastapi
 pandas
 sklearn
+pandas
+matplotlib
+glob2
+prophet
+
