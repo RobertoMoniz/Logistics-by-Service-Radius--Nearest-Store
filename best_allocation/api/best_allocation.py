@@ -15,7 +15,7 @@ app = FastAPI()
 def optimize(hub,date,available_employees,work_hours=8,service_time=0.5,conversion_rate=0.2):
     
     #Transforming f rom string
-    date=pd.to_datetime(date)
+    date=pd.to_datetime(date,dayfirst=True)
     available_employees=float(available_employees)
     work_hours=float(work_hours)
     service_time=float(service_time)
@@ -38,10 +38,8 @@ def optimize(hub,date,available_employees,work_hours=8,service_time=0.5,conversi
     
     print('Defining the number of employees')
     n_employees = best_number_of_employees(daily_demmand,conversion_rate,work_hours,service_time)
-    areas = best_areas(available_employees)
+    areas = best_areas(daily_demmand,available_employees,conversion_rate,work_hours,service_time)
     
     response = {'necessary_employees':n_employees,'suggested_areas':areas}
     
     return response
-
-print(optimize('São Cristóvão', '08/10/2022', 8))
