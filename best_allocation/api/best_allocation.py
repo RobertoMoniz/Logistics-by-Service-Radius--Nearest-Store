@@ -28,7 +28,7 @@ def optimize(hub,date,available_employees,work_hours=8,service_time=0.5,conversi
     df=partition_data(df, hub)
 
     print('Spliting df')
-    df=define_area(df,hub)
+    df,centers=define_area(df,hub)
 
     print('Predicting the demmand')
     prediction = prophet_predict(df)
@@ -38,8 +38,12 @@ def optimize(hub,date,available_employees,work_hours=8,service_time=0.5,conversi
     
     print('Defining the number of employees')
     n_employees = best_number_of_employees(daily_demmand,conversion_rate,work_hours,service_time)
+
+    print('defining the best areas')
     areas = best_areas(daily_demmand,available_employees,conversion_rate,work_hours,service_time)
+    areas_df = pd.DataFrame(areas)
     
-    response = {'necessary_employees':n_employees,'suggested_areas':areas}
+    response = {'necessary_employees':n_employees,'suggested_areas':areas_df.to_dict('index'),'centers': pd.DataFrame(centers).to_dict('index')}
     
     return response
+
