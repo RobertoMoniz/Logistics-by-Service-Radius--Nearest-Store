@@ -6,7 +6,8 @@ import requests
 import glob
 import os
 import pandas as pd
-from charts import show_evolution,show_heatmap,get_historical_data
+from charts import show_evolution,show_heatmap,get_historical_data, show_map
+from voronoi import calc_polygons, plot_voronoi
 from streamlit_folium import st_folium, folium_static
 
 @st.cache
@@ -84,7 +85,9 @@ def demmand_prediction():
                centers_df = pd.DataFrame.from_dict(response.json()['centers'],orient='index').reset_index()
                
                areas_df=areas_df.groupby(by='area_id',as_index=False).count()
-
+               areas_df.columns=['area_id','number of employees']
+               
+               st.header("Staff analysis")
                st.write("Necessary Employees:\n" + str(necessary_employees))
                st.write("Available Employees:\n" + str(available_employees))
                
@@ -96,16 +99,28 @@ def demmand_prediction():
                     st.write('Optimal staff')
 
 
+               
                centers_df.columns=['area_id','latitude','longitude']
                centers_df['area_id']=centers_df['area_id'].astype(int)
 
+               centers_df["polygons"] = calc_polygons(centers_df)
+
+               col1, col2 = st.columns((5,2))
+               
                final_df = pd.merge(areas_df,centers_df,on='area_id',how='right')
 
-               final_df['predicted_demmand']=final_df['predicted_demmand'].fillna(0).astype(int)
+               final_df['number of employees']=final_df['number of employees'].fillna(0).astype(int)
+
+               with col1:
+                    st.header("Area Centers")
+                    m=show_map(final_df,hub)[0]
+                    plot_voronoi(final_df, m)
+                    st_folium(m,height=500,width=600)
                
-               #final_df.apply(lambda x: 'area '+str(x['area_id'])).set_index()
+               with col2:
+                    st.header("Allocation")               
+                    st.dataframe(show_map(final_df,hub)[1][['color','number of employees']],height=500,width=500)
                
-               st.dataframe(final_df)
 
 
 def demmand_evolution():
@@ -144,7 +159,7 @@ def demmand_evolution():
                end_date = f'{end_date.day}/{end_date.month}/{end_date.year}'
                #url = f'https://best-allocation-eiwjbu3z3a-uc.a.run.app/historic?hub={hub}&start_date={start_date}&end_date={end_date}'
                df = get_historical_data(hub,start_date,end_date)
-               folium_static(show_evolution(df, hub),width=1000,height=700)
+               folium_static(show_evolution(df, hub)[0],width=1000,height=700)
             
 def demmand_heamap():
      with st.form("heatmap"):

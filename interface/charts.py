@@ -2,6 +2,7 @@ import glob
 import pandas as pd
 import folium
 from folium import plugins
+from scipy.spatial import Voronoi, voronoi_plot_2d
 
 def get_historical_data(hub,start_date,end_date):
     start_date = pd.to_datetime(start_date,dayfirst=True).date()
@@ -53,6 +54,7 @@ def show_evolution(df,hub,tiles= "cartodbpositron",min_zoom=5, zoom_start=11, ma
     
     hm = plugins.HeatMapWithTime(data_list, auto_play=True,max_opacity=2,min_opacity=0.4,radius=radius,min_speed=min_speed)
     hm.add_to(new_map)
+
     return new_map
 
 def show_heatmap(df,hub):
@@ -65,3 +67,45 @@ def show_heatmap(df,hub):
     hm = plugins.HeatMap(heat_df,radius=3,min_opacity=0.4,max_opacity=2,blur=4)
     hm.add_to(new_map)
     return new_map
+
+def show_map(df,hub):
+    hub_coordinates = get_hubs_coordinates(hub)
+
+    m = folium.Map(location=hub_coordinates,tiles= "cartodbpositron",min_zoom=5, zoom_start=11, max_zoom=40)
+    
+    colors=['red', 'blue', 'green', 'purple', 'orange', 'darkred', 'lightred', 'beige', 'darkblue', 'darkgreen', 'cadetblue', 'darkpurple', 'white', 'pink', 'lightblue', 'lightgreen', 'gray', 'black', 'lightgray']
+    
+    for i in range(0,len(df)):
+        folium.Marker(
+        location=[df.iloc[i]['latitude'], df.iloc[i]['longitude']],
+        popup=df.iloc[i]['number of employees'],
+        icon=folium.Icon(color=colors[i])
+        ).add_to(m)
+        
+    df['color']=colors[0:len(df)]
+    return m, df
+
+
+def show_map_vor(df,hub):
+    hub_coordinates = get_hubs_coordinates(hub)
+
+    m = folium.Map(location=hub_coordinates,tiles= "cartodbpositron",min_zoom=5, zoom_start=11, max_zoom=40)
+    
+    
+    
+    coords=[]
+    
+    colors=['red', 'blue', 'green', 'purple', 'orange', 'darkred', 'lightred', 'beige', 'darkblue', 'darkgreen', 'cadetblue', 'darkpurple', 'white', 'pink', 'lightblue', 'lightgreen', 'gray', 'black', 'lightgray']
+    
+    for i in range(0,len(df)):
+        folium.Marker(
+        location=[df.iloc[i]['latitude'], df.iloc[i]['longitude']],
+        popup=df.iloc[i]['number of employees'],
+        icon=folium.Icon(color=colors[i])
+        ).add_to(m)
+        coords.append([df.iloc[i]['latitude'], df.iloc[i]['longitude']])
+        
+    df['color']=colors[0:len(df)]
+    return m, df
+
+

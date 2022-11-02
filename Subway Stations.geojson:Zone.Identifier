@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://data.cityofnewyork.us/Transportation/Subway-Stations/arq3-7z49
+HostUrl=https://data.cityofnewyork.us/api/geospatial/arq3-7z49?method=export&format=GeoJSON
