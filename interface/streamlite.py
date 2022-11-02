@@ -77,30 +77,36 @@ def demmand_prediction():
                date_br = f'{date.day}/{date.month}/{date.year}'
                st.sidebar.write('Date: ', date_br)
                url = f'https://best-allocation-eiwjbu3z3a-uc.a.run.app/optimize?hub={hub}&date={date_br}&available_employees={available_employees}&work_hours=8&service_time=0.5&conversion_rate=0.2'
+               
                response = requests.get(url)
-               areas = response.json()['suggested_areas']
+               areas_df = pd.DataFrame.from_dict(response.json()['suggested_areas'],orient='index')
                necessary_employees = response.json()['necessary_employees']
-               centers = response.json()['centers']
-               dicionario = {0: 0, 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0, 11:0, 12:0, 13:0, 14:0, 15:0}
-               for i in areas:
-                    demanda = areas[i]['area_id']
-                    dicionario[demanda] = dicionario[demanda] + 1
-               df = pd.DataFrame.from_dict(dicionario, orient='index', columns=['demanda'])
-               df = df.reset_index()
-               df = df.rename(columns={'index':'area'})
-               #df = df.set_index('area')
-               hide_dataframe_row_index = """
-                    <style>
-                    .row_heading.level0 {display:none}
-                    .blank {display:none}
-                    </style>
-                    """
+               centers_df = pd.DataFrame.from_dict(response.json()['centers'],orient='index').reset_index()
+               
+               areas_df=areas_df.groupby(by='area_id',as_index=False).count()
 
-               # Inject CSS with Markdown
-               st.markdown(hide_dataframe_row_index, unsafe_allow_html=True)
+               st.write("Necessary Employees:\n" + str(necessary_employees))
+               st.write("Available Employees:\n" + str(available_employees))
+               
+               if necessary_employees > available_employees:
+                    st.write('Undersized staff')
+               elif necessary_employees == available_employees:
+                    st.write('Oversized staff')
+               else:
+                    st.write('Optimal staff')
 
-               # Display an interactive table
-               st.dataframe(df)
+
+               centers_df.columns=['area_id','latitude','longitude']
+               centers_df['area_id']=centers_df['area_id'].astype(int)
+
+               final_df = pd.merge(areas_df,centers_df,on='area_id',how='right')
+
+               final_df['predicted_demmand']=final_df['predicted_demmand'].fillna(0).astype(int)
+               
+               #final_df.apply(lambda x: 'area '+str(x['area_id'])).set_index()
+               
+               st.dataframe(final_df)
+
 
 def demmand_evolution():
      with st.form("my_form"):
