@@ -6,7 +6,7 @@ import folium
 from folium import vector_layers 
 import math
 
-def voronoi_finite_polygons_2d(vor, radius=None):
+def voronoi_finite_polygons_2d(vor, radius=0.05):
     """
     Reconstruct infinite voronoi regions in a 2D diagram to finite
     regions.
