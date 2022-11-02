@@ -10,4 +10,3 @@ def define_area(partitioned_data,hub):
     partitioned_data['area_id']=model.predict(partitioned_data[['latitude','longitude']])
 
     return partitioned_data, model.cluster_centers_
-

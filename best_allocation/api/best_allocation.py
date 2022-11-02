@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from api.ml_logic.data_treatment import get_data, partition_data
+from api.ml_logic.data_treatment import get_data, partition_data, get_evolution
 from api.ml_logic.area_definition import define_area
 from api.ml_logic.optimization import best_number_of_employees, best_areas
 from api.ml_logic.demmand_forecasting import prophet_predict, predict_demmand
@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import random
 import math
+import datetime as dt
 
 app = FastAPI()
 
@@ -47,3 +48,18 @@ def optimize(hub,date,available_employees,work_hours=8,service_time=0.5,conversi
     
     return response
 
+
+@app.get('/historic')
+def get_historic_data(hub,start_date,end_date):
+    print('initial statements')
+    start_date = pd.to_datetime(start_date,dayfirst=True).date()
+    end_date = pd.to_datetime(end_date,dayfirst=True).date()
+    print('getting data')
+    df = get_data()
+    print('partitioning data')
+    df,latitude,longitude = (get_evolution(df, hub, start_date, end_date))
+    print('dropping na')
+    df.dropna(inplace=True)
+    print('creating response')
+    response = {'data':df.to_dict('index'),'hub_latitude':latitude,'hub_longitude':longitude}
+    return response
